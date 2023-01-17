@@ -8,5 +8,6 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-ENV GOOS=windows GOARCH=amd64
-CMD go build -o /usr/local/bin/build/
+#ENV GOOS=windows GOARCH=amd64
+ENV GOOS=js GOARCH=wasm
+CMD go build -o /usr/local/bin/build/ebiten_2048.wasm
