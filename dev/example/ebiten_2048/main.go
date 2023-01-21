@@ -17,7 +17,8 @@ package main
 import (
 	"log"
 
-	"ebiten_2048/2048"
+	twenty48 "ebiten_2048/2048"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

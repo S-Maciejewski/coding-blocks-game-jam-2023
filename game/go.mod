@@ -1,4 +1,4 @@
-module ebiten_2048
+module reverse_battleships
 
 go 1.19
 
