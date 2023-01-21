@@ -1,8 +1,6 @@
 package battleships
 
 import (
-	"fmt"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -165,19 +163,20 @@ func (b *Board) Draw(drawerImage *ebiten.Image) {
 }
 
 func (b *Board) SetHighlight(ship *Ship) {
-	for i := 0; i < b.size; i++ {
-		for j := 0; j < b.size; j++ {
-			b.tileAt(i, j).isHovered = false
-		}
-	}
-
 	tile := b.tileAtWorldPos(ship.globalX, ship.globalY)
 
 	if tile != nil {
 		highlightedTiles := b.tilesForShipPlacement(tile.x, tile.y, ship)
 		for _, tile := range highlightedTiles {
 			tile.isHovered = true
-			fmt.Println("ahhshashashfhfhf")
+		}
+	}
+}
+
+func (b *Board) ResetHighlight() {
+	for i := 0; i < b.size; i++ {
+		for j := 0; j < b.size; j++ {
+			b.tileAt(i, j).isHovered = false
 		}
 	}
 }

@@ -75,6 +75,7 @@ func (g *Game) Update() error {
 		g.heldShip = nil
 	}
 
+	g.board.ResetHighlight()
 	if g.heldShip != nil {
 		x, y := ebiten.CursorPosition()
 		g.heldShip.globalX = x
