@@ -42,7 +42,7 @@ func (b *Board) placeBomb(x, y int) {
 	b.tileAt(x, y).state = BombState
 }
 
-func (b *Board) setShipWithCalculatedMoves(ship *Ship) {
+func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
 	for _, move := range ship.moves {
 		//	for each move calculate if it's possible and set isPossible value
 		//	possible move is when ship is not out of board and there is EmptyState tile in places where ship would be after move
