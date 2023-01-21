@@ -66,13 +66,21 @@ func (b *Board) tilesForShipPlacement(x, y int, ship *Ship) []*Tile {
 }
 
 func (b *Board) placeShip(ship *Ship) {
-	for _, pos := range ship.pos {
-		if pos.isFront {
-			b.tileAt(pos.x, pos.y).state = ShipFrontState
+	startTile := b.tileAtWorldPos(ship.globalX, ship.globalY)
+	tiles := b.tilesForShipPlacement(startTile.x, startTile.y, ship)
+
+	for idx, tile := range tiles {
+		if (ship.rotation == LeftRotation || ship.rotation == RightRotation) && idx == 0 {
+			tile.state = ShipFrontState
+		} else if (ship.rotation == RightRotation || ship.rotation == DownRotation) && idx == ship.length-1 {
+			tile.state = ShipFrontState
 		} else {
-			b.tileAt(pos.x, pos.y).state = ShipState
+			tile.state = ShipState
 		}
 	}
+
+	ship.globalX = startTile.x*tileSize + xOffset
+	ship.globalY = startTile.y*tileSize + yOffset
 }
 
 func (b *Board) placeBomb(x, y int) {
@@ -164,11 +172,13 @@ func (b *Board) Draw(drawerImage *ebiten.Image) {
 
 func (b *Board) SetHighlight(ship *Ship) {
 	tile := b.tileAtWorldPos(ship.globalX, ship.globalY)
+	ship.isLegalPlacement = false
 
 	if tile != nil {
 		highlightedTiles := b.tilesForShipPlacement(tile.x, tile.y, ship)
 		for _, tile := range highlightedTiles {
 			tile.isHovered = true
+			ship.isLegalPlacement = true
 		}
 	}
 }

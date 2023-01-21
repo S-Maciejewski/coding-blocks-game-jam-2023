@@ -21,7 +21,6 @@ type Game struct {
 	board    *Board
 	ships    []*Ship
 	drawer   ShipDrawer
-	touchIDs []ebiten.TouchID
 	heldShip *Ship
 	shooter  *Shooter
 }
@@ -70,8 +69,11 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && g.heldShip != nil {
-		// TODO Check if valid placement
-		g.heldShip.ResetToPreviousPosition()
+		if g.heldShip.isLegalPlacement {
+			g.board.placeShip(g.heldShip)
+		} else {
+			g.heldShip.ResetToPreviousPosition()
+		}
 		g.heldShip = nil
 	}
 

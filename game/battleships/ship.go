@@ -114,6 +114,12 @@ func (s *Ship) ResetToPreviousPosition() {
 	s.rotateTo(s.previousRotation)
 }
 
+func (s *Ship) Place() {
+	s.globalX = s.previousPosX
+	s.globalY = s.previousPosY
+	s.rotateTo(s.previousRotation)
+}
+
 func (s *Ship) MoveShip(move Move) {
 	//	move offset should be calculated from the front of the ship
 	if move.isPossible {
