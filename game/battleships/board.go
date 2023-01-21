@@ -49,19 +49,25 @@ func (b *Board) setShipWithCalculatedMoves(ship *Ship) {
 		//	for each move calculate if it's possible and set isPossible value
 		//	possible move is when ship is not out of board and there is EmptyState tile in places where ship would be after move
 
+		shipFrontPos := ship.pos[0]
+		if !shipFrontPos.isFront {
+			shipFrontPos = ship.pos[ship.length-1]
+		}
+
 		//	ship is not out of board
-		if ship.pos[0].x+move.xOffset >= 0 &&
-			ship.pos[0].x+move.xOffset < b.size &&
-			ship.pos[0].y+move.yOffset >= 0 &&
-			ship.pos[0].y+move.yOffset < b.size {
+		if shipFrontPos.x+move.xOffset >= 0 &&
+			shipFrontPos.x+move.xOffset < b.size &&
+			shipFrontPos.y+move.yOffset >= 0 &&
+			shipFrontPos.y+move.yOffset < b.size {
 			//	there is EmptyState tile in places where ship will be after move
-			move.isPossible = true
+			tileClear := true
 			for i := 0; i < ship.length; i++ {
-				if b.tileAt(ship.pos[0].x+move.xOffset, ship.pos[0].y+move.yOffset).state != EmptyState {
-					move.isPossible = false
+				if b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state != EmptyState {
+					tileClear = false
 					break
 				}
 			}
+			move.isPossible = tileClear
 		}
 	}
 }
@@ -69,9 +75,12 @@ func (b *Board) setShipWithCalculatedMoves(ship *Ship) {
 func (b *Board) showLegalMoves(ship *Ship) {
 	for _, move := range ship.moves {
 		if move.isPossible {
-			//	for each that ship will occupy after move set state to LegalMoveState
+			// set LegalMoveState for each tile where ship would be after move unless it'll be in place where ship is already
 			for i := 0; i < ship.length; i++ {
-				b.tileAt(ship.pos[0].x+move.xOffset, ship.pos[0].y+move.yOffset).state = LegalMoveState
+				if b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state != ShipState &&
+					b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state != ShipFrontState {
+					b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state = LegalMoveState
+				}
 			}
 		}
 	}
