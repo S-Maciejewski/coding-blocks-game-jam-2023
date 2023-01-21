@@ -96,11 +96,11 @@ func (s *Ship) MoveShip(move Move) {
 	//	move offset should be calculated from the front of the ship
 	if move.isPossible {
 		if s.pos[0].isFront {
-			s.pos[0].x += xOffset
-			s.pos[0].y += yOffset
+			s.pos[0].x += move.xOffset
+			s.pos[0].y += move.yOffset
 		} else {
-			s.pos[0].x -= xOffset
-			s.pos[0].y -= yOffset
+			s.pos[0].x -= move.xOffset
+			s.pos[0].y -= move.yOffset
 		}
 	} else {
 		panic("Impossible move attempted")
