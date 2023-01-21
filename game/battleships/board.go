@@ -66,6 +66,10 @@ func (b *Board) tilesForShipPlacement(x, y int, ship *Ship) []*Tile {
 }
 
 func (b *Board) placeShip(ship *Ship) {
+	for _, tile := range ship.placedAtTiles {
+		tile.state = EmptyState
+	}
+
 	startTile := b.tileAtWorldPos(ship.globalX, ship.globalY)
 	tiles := b.tilesForShipPlacement(startTile.x, startTile.y, ship)
 
@@ -79,6 +83,7 @@ func (b *Board) placeShip(ship *Ship) {
 		}
 	}
 
+	ship.placedAtTiles = tiles
 	ship.globalX = startTile.x*tileSize + xOffset
 	ship.globalY = startTile.y*tileSize + yOffset
 }

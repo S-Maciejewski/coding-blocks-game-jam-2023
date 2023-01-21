@@ -28,6 +28,7 @@ type Ship struct {
 	isLegalPlacement           bool
 	rotation                   ShipRotation
 	previousRotation           ShipRotation
+	placedAtTiles              []*Tile
 }
 
 func GenerateShips(len2, len3, len4, len5 int) []*Ship {
