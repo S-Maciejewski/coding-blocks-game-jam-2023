@@ -80,6 +80,7 @@ func (g *Game) Update() error {
 		g.heldShip.globalX = x
 		g.heldShip.globalY = y
 		g.heldShip.isSelected = true
+		g.board.SetHighlight(g.heldShip)
 	}
 
 	return nil

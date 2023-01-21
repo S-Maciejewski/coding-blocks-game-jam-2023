@@ -1,6 +1,8 @@
 package battleships
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -26,6 +28,43 @@ func NewBoard(size int) *Board {
 
 func (b *Board) tileAt(x, y int) *Tile {
 	return &b.tiles[x][y]
+}
+
+func (b *Board) tileAtWorldPos(x, y int) *Tile {
+	var foundTile *Tile = nil
+
+	for i := 0; i < b.size; i++ {
+		for j := 0; j < b.size; j++ {
+			tile := b.tileAt(i, j)
+
+			if tile.x*tileSize+xOffset < x && ((tile.x+1)*tileSize+xOffset) > x && tile.y*tileSize+yOffset < y && ((tile.y+1)*tileSize+yOffset) > y {
+				foundTile = tile
+				break
+			}
+		}
+	}
+
+	return foundTile
+}
+
+func (b *Board) tilesForShipPlacement(x, y int, ship *Ship) []*Tile {
+	tiles := []*Tile{}
+
+	for i := 0; i < ship.length; i++ {
+		if x >= b.size || y >= b.size {
+			return []*Tile{}
+		}
+
+		tiles = append(tiles, b.tileAt(x, y))
+
+		if ship.rotation == LeftRotation || ship.rotation == RightRotation {
+			x += 1
+		} else {
+			y += 1
+		}
+	}
+
+	return tiles
 }
 
 func (b *Board) placeShip(ship *Ship) {
@@ -121,6 +160,24 @@ func (b *Board) Draw(drawerImage *ebiten.Image) {
 			if tile.isHovered {
 				drawerImage.DrawImage(hoverImage, op)
 			}
+		}
+	}
+}
+
+func (b *Board) SetHighlight(ship *Ship) {
+	for i := 0; i < b.size; i++ {
+		for j := 0; j < b.size; j++ {
+			b.tileAt(i, j).isHovered = false
+		}
+	}
+
+	tile := b.tileAtWorldPos(ship.globalX, ship.globalY)
+
+	if tile != nil {
+		highlightedTiles := b.tilesForShipPlacement(tile.x, tile.y, ship)
+		for _, tile := range highlightedTiles {
+			tile.isHovered = true
+			fmt.Println("ahhshashashfhfhf")
 		}
 	}
 }
