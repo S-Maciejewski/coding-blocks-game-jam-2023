@@ -18,7 +18,7 @@ func NewDrawer(ships []*Ship) *ShipDrawer {
 
 const (
 	shipTileSize = 80
-	tileMargin   = 4
+	drawerOffset = 50
 )
 
 var (
@@ -30,15 +30,23 @@ func init() {
 }
 
 func (b *ShipDrawer) Draw(drawerImage *ebiten.Image) {
-	offset := 200
+	width, height := drawerImage.Size()
+	xOffset := drawerOffset
+	yOffset := height - (3 * shipTileSize)
 	for _, ship := range b.ships {
+
+		if (ship.length*shipTileSize)+xOffset >= (width - drawerOffset) {
+			xOffset = drawerOffset
+			yOffset += shipTileSize + 10
+		}
+
 		for i := 0; i < ship.length; i++ {
 			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64(i*shipTileSize+offset), 500)
+			op.GeoM.Translate(float64((i*shipTileSize)+xOffset), float64(yOffset))
 			drawerImage.DrawImage(shipImage, op)
 		}
 
-		offset = offset + 150
+		xOffset += (ship.length * shipTileSize) + drawerOffset
 	}
 
 }
