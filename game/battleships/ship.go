@@ -1,5 +1,9 @@
 package battleships
 
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+)
+
 type ShipPosition struct {
 	x       int
 	y       int
@@ -18,10 +22,11 @@ type Ship struct {
 	moves      []Move
 	pos        []ShipPosition
 	isSelected bool
+	images     []ebiten.Image
 }
 
 func GenerateShips(len2, len3, len4, len5 int) []*Ship {
-	ships := []*Ship{}
+	var ships []*Ship
 	for i := 0; i < len2; i++ {
 		ships = append(ships, NewShip(2))
 	}
@@ -77,7 +82,6 @@ func getMovesForShipLength(length int) []Move {
 }
 
 func NewShip(length int) *Ship {
-
 	ship := &Ship{
 		length:     length,
 		health:     length,
@@ -88,14 +92,18 @@ func NewShip(length int) *Ship {
 	return ship
 }
 
-func (s *Ship) Move(xOffset, yOffset int) {
+func (s *Ship) MoveShip(move Move) {
 	//	move offset should be calculated from the front of the ship
-	if s.pos[0].isFront {
-		s.pos[0].x += xOffset
-		s.pos[0].y += yOffset
+	if move.isPossible {
+		if s.pos[0].isFront {
+			s.pos[0].x += xOffset
+			s.pos[0].y += yOffset
+		} else {
+			s.pos[0].x -= xOffset
+			s.pos[0].y -= yOffset
+		}
 	} else {
-		s.pos[0].x -= xOffset
-		s.pos[0].y -= yOffset
+		panic("Impossible move attempted")
 	}
 }
 
@@ -109,5 +117,13 @@ func (s *Ship) Rotate180() {
 	for i := 0; i < s.length; i++ {
 		s.pos[i].x = -s.pos[i].x
 		s.pos[i].y = -s.pos[i].y
+	}
+}
+
+func (s *Ship) Draw(drawerImage *ebiten.Image, startPosX, startPosY int) {
+	for i := 0; i < s.length; i++ {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64((i*shipTileSize)+startPosX), float64(startPosY))
+		drawerImage.DrawImage(shipImage, op)
 	}
 }

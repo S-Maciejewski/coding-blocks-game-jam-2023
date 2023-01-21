@@ -40,13 +40,8 @@ func (b *ShipDrawer) Draw(drawerImage *ebiten.Image) {
 			yOffset += shipTileSize + 10
 		}
 
-		for i := 0; i < ship.length; i++ {
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64((i*shipTileSize)+xOffset), float64(yOffset))
-			drawerImage.DrawImage(shipImage, op)
-		}
+		ship.Draw(drawerImage, xOffset, yOffset)
 
 		xOffset += (ship.length * shipTileSize) + drawerOffset
 	}
-
 }
