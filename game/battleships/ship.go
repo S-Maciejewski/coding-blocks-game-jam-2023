@@ -13,10 +13,11 @@ type Move struct {
 }
 
 type Ship struct {
-	length int
-	health int
-	moves  []Move
-	pos    []ShipPosition
+	length     int
+	health     int
+	moves      []Move
+	pos        []ShipPosition
+	isSelected bool
 }
 
 func GenerateShips(len2, len3, len4, len5 int) []*Ship {
@@ -38,10 +39,11 @@ func GenerateShips(len2, len3, len4, len5 int) []*Ship {
 
 func NewShip(length int) *Ship {
 	ship := &Ship{
-		length: length,
-		health: length,
-		moves:  []Move{},
-		pos:    []ShipPosition{},
+		length:     length,
+		health:     length,
+		moves:      []Move{},
+		pos:        []ShipPosition{},
+		isSelected: false,
 	}
 	return ship
 }

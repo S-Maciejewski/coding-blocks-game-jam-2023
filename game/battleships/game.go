@@ -3,6 +3,8 @@ package battleships
 import (
 	"math/rand"
 	"time"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func init() {
@@ -15,20 +17,34 @@ const (
 )
 
 type Game struct {
-	input *Input
-	board *Board
-	ships []*Ship
+	input  *Input
+	board  *Board
+	ships  []*Ship
+	drawer ShipDrawer
 }
 
 func NewGame() *Game {
+	ships := GenerateShips(1, 1, 1, 1)
 	g := &Game{
-		input: NewInput(),
-		board: NewBoard(10),
-		ships: GenerateShips(1, 1, 1, 1),
+		input:  NewInput(),
+		board:  NewBoard(10),
+		ships:  ships,
+		drawer: *NewDrawer(ships),
 	}
 	return g
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return ScreenWidth, ScreenHeight
+}
+
+func (g *Game) Update() error {
+	g.input.Update()
+	//TODO: update board here
+	return nil
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
+	screen.Fill(backgroundColor)
+	g.drawer.Draw(screen)
 }
