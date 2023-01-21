@@ -23,6 +23,7 @@ type Game struct {
 	drawer   ShipDrawer
 	touchIDs []ebiten.TouchID
 	heldShip *Ship
+	shooter  *Shooter
 }
 
 func NewGame() *Game {
@@ -47,9 +48,10 @@ func NewGame() *Game {
 	}
 
 	g := &Game{
-		board:  NewBoard(10),
-		ships:  ships,
-		drawer: *NewDrawer(ships),
+		board:   NewBoard(10),
+		ships:   ships,
+		drawer:  *NewDrawer(ships),
+		shooter: NewShooter(),
 	}
 	return g
 }

@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestShooter_PickSpotForBomb(t *testing.T) {
+func TestShooter_GetNewBomb(t *testing.T) {
 	type fields struct {
 		bombsDropped []Bomb
 	}
@@ -106,8 +106,8 @@ func TestShooter_PickSpotForBomb(t *testing.T) {
 			s := &Shooter{
 				bombsDropped: tt.fields.bombsDropped,
 			}
-			if got := s.PickSpotForBomb(tt.args.board); got.x < 0 || got.x > tt.args.board.size || got.y < 0 || got.y > tt.args.board.size || got.didHit != false {
-				t.Errorf("PickSpotForBomb() = %v, invalid value", got)
+			if got := s.GetNewBomb(tt.args.board); got.x < 0 || got.x > tt.args.board.size || got.y < 0 || got.y > tt.args.board.size || got.didHit != false {
+				t.Errorf("GetNewBomb() = %v, invalid value", got)
 			}
 		})
 	}

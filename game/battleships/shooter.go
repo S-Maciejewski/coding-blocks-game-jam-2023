@@ -14,7 +14,13 @@ type Shooter struct {
 	bombsDropped []Bomb
 }
 
-func (s *Shooter) PickSpotForBomb(board *Board) Bomb {
+func NewShooter() *Shooter {
+	return &Shooter{
+		bombsDropped: []Bomb{},
+	}
+}
+
+func (s *Shooter) GetNewBomb(board *Board) Bomb {
 	var bombPosition Bomb
 
 	if len(s.bombsDropped) != 0 && s.bombsDropped[len(s.bombsDropped)-1].didHit {
