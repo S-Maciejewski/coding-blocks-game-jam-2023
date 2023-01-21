@@ -102,6 +102,7 @@ var (
 	bombStateImage         = ebiten.NewImage(shipTileSize, shipTileSize)
 	legalMoveImage         = ebiten.NewImage(shipTileSize, shipTileSize)
 	illegalMoveImage       = ebiten.NewImage(shipTileSize, shipTileSize)
+	hoverImage             = ebiten.NewImage(shipTileSize, shipTileSize)
 )
 
 func init() {
@@ -114,6 +115,7 @@ func init() {
 	bombStateImage.Fill(color.RGBA{0x66, 0x33, 0x00, 0xff})
 	legalMoveImage.Fill(color.RGBA{0x66, 0xff, 0xb2, 0xff})
 	illegalMoveImage.Fill(color.RGBA{0xff, 0x66, 0x66, 0xff})
+	hoverImage.Fill(color.RGBA{0x00, 0x00, 0x00, 0x7f})
 }
 
 func (b *Board) Draw(drawerImage *ebiten.Image) {
@@ -141,6 +143,10 @@ func (b *Board) Draw(drawerImage *ebiten.Image) {
 				drawerImage.DrawImage(legalMoveImage, op)
 			case IllegalMoveState:
 				drawerImage.DrawImage(illegalMoveImage, op)
+			}
+
+			if tile.isHovered {
+				drawerImage.DrawImage(hoverImage, op)
 			}
 		}
 	}

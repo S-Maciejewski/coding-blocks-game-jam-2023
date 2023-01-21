@@ -17,7 +17,6 @@ const (
 )
 
 type Game struct {
-	input  *Input
 	board  *Board
 	ships  []*Ship
 	drawer ShipDrawer
@@ -26,7 +25,6 @@ type Game struct {
 func NewGame() *Game {
 	ships := GenerateShips(1, 1, 1, 1)
 	g := &Game{
-		input:  NewInput(),
 		board:  NewBoard(10),
 		ships:  ships,
 		drawer: *NewDrawer(ships),
@@ -39,7 +37,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) Update() error {
-	g.input.Update()
+	// g.input.Update()
 	//TODO: update board here
 	return nil
 }

@@ -5,197 +5,97 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-type Dir int
-
-const (
-	DirUp Dir = iota
-	DirRight
-	DirDown
-	DirLeft
-)
-
-type mouseState int
-
-const (
-	mouseStateNone mouseState = iota
-	mouseStatePressing
-	mouseStateSettled
-)
-
-type touchState int
-
-const (
-	touchStateNone touchState = iota
-	touchStatePressing
-	touchStateSettled
-	touchStateInvalid
-)
-
-// String returns a string representing the direction.
-func (d Dir) String() string {
-	switch d {
-	case DirUp:
-		return "Up"
-	case DirRight:
-		return "Right"
-	case DirDown:
-		return "Down"
-	case DirLeft:
-		return "Left"
-	}
-	panic("not reach")
+// StrokeSource represents a input device to provide strokes.
+type StrokeSource interface {
+	Position() (int, int)
+	IsJustReleased() bool
 }
 
-// Vector returns a [-1, 1] value for each axis.
-func (d Dir) Vector() (x, y int) {
-	switch d {
-	case DirUp:
-		return 0, -1
-	case DirRight:
-		return 1, 0
-	case DirDown:
-		return 0, 1
-	case DirLeft:
-		return -1, 0
-	}
-	panic("not reach")
+// MouseStrokeSource is a StrokeSource implementation of mouse.
+type MouseStrokeSource struct{}
+
+func (m *MouseStrokeSource) Position() (int, int) {
+	return ebiten.CursorPosition()
 }
 
-type Input struct {
-	mouseState    mouseState
-	mouseInitPosX int
-	mouseInitPosY int
-	mouseDir      Dir
-
-	touches       []ebiten.TouchID
-	touchState    touchState
-	touchID       ebiten.TouchID
-	touchInitPosX int
-	touchInitPosY int
-	touchLastPosX int
-	touchLastPosY int
-	touchDir      Dir
+func (m *MouseStrokeSource) IsJustReleased() bool {
+	return inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft)
 }
 
-func NewInput() *Input {
-	return &Input{}
+// TouchStrokeSource is a StrokeSource implementation of touch.
+type TouchStrokeSource struct {
+	ID ebiten.TouchID
 }
 
-func abs(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
+func (t *TouchStrokeSource) Position() (int, int) {
+	return ebiten.TouchPosition(t.ID)
 }
 
-func vecToDir(dx, dy int) (Dir, bool) {
-	if abs(dx) < 4 && abs(dy) < 4 {
-		return 0, false
-	}
-	if abs(dx) < abs(dy) {
-		if dy < 0 {
-			return DirUp, true
-		}
-		return DirDown, true
-	}
-	if dx < 0 {
-		return DirLeft, true
-	}
-	return DirRight, true
+func (t *TouchStrokeSource) IsJustReleased() bool {
+	return inpututil.IsTouchJustReleased(t.ID)
 }
 
-func (i *Input) Update() {
-	switch i.mouseState {
-	case mouseStateNone:
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			x, y := ebiten.CursorPosition()
-			i.mouseInitPosX = x
-			i.mouseInitPosY = y
-			i.mouseState = mouseStatePressing
-		}
-	case mouseStatePressing:
-		if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			x, y := ebiten.CursorPosition()
-			dx := x - i.mouseInitPosX
-			dy := y - i.mouseInitPosY
-			d, ok := vecToDir(dx, dy)
-			if !ok {
-				i.mouseState = mouseStateNone
-				break
-			}
-			i.mouseDir = d
-			i.mouseState = mouseStateSettled
-		}
-	case mouseStateSettled:
-		i.mouseState = mouseStateNone
-	}
+// Stroke manages the current drag state by mouse.
+type Stroke struct {
+	source StrokeSource
 
-	i.touches = ebiten.AppendTouchIDs(i.touches[:0])
-	switch i.touchState {
-	case touchStateNone:
-		if len(i.touches) == 1 {
-			i.touchID = i.touches[0]
-			x, y := ebiten.TouchPosition(i.touches[0])
-			i.touchInitPosX = x
-			i.touchInitPosY = y
-			i.touchLastPosX = x
-			i.touchLastPosX = y
-			i.touchState = touchStatePressing
-		}
-	case touchStatePressing:
-		if len(i.touches) >= 2 {
-			break
-		}
-		if len(i.touches) == 1 {
-			if i.touches[0] != i.touchID {
-				i.touchState = touchStateInvalid
-			} else {
-				x, y := ebiten.TouchPosition(i.touches[0])
-				i.touchLastPosX = x
-				i.touchLastPosY = y
-			}
-			break
-		}
-		if len(i.touches) == 0 {
-			dx := i.touchLastPosX - i.touchInitPosX
-			dy := i.touchLastPosY - i.touchInitPosY
-			d, ok := vecToDir(dx, dy)
-			if !ok {
-				i.touchState = touchStateNone
-				break
-			}
-			i.touchDir = d
-			i.touchState = touchStateSettled
-		}
-	case touchStateSettled:
-		i.touchState = touchStateNone
-	case touchStateInvalid:
-		if len(i.touches) == 0 {
-			i.touchState = touchStateNone
-		}
+	// initX and initY represents the position when dragging starts.
+	initX int
+	initY int
+
+	// currentX and currentY represents the current position
+	currentX int
+	currentY int
+
+	released bool
+
+	// draggingObject represents a object (sprite in this case)
+	// that is being dragged.
+	draggingObject any
+}
+
+func NewStroke(source StrokeSource) *Stroke {
+	cx, cy := source.Position()
+	return &Stroke{
+		source:   source,
+		initX:    cx,
+		initY:    cy,
+		currentX: cx,
+		currentY: cy,
 	}
 }
 
-// Dir returns a currently pressed direction.
-// Dir returns false if no direction key is pressed.
-func (i *Input) Dir() (Dir, bool) {
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) {
-		return DirUp, true
+func (s *Stroke) Update() {
+	if s.released {
+		return
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) {
-		return DirLeft, true
+	if s.source.IsJustReleased() {
+		s.released = true
+		return
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) {
-		return DirRight, true
-	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) {
-		return DirDown, true
-	}
-	if i.mouseState == mouseStateSettled {
-		return i.mouseDir, true
-	}
-	if i.touchState == touchStateSettled {
-		return i.touchDir, true
-	}
-	return 0, false
+	x, y := s.source.Position()
+	s.currentX = x
+	s.currentY = y
+}
+
+func (s *Stroke) IsReleased() bool {
+	return s.released
+}
+
+func (s *Stroke) Position() (int, int) {
+	return s.currentX, s.currentY
+}
+
+func (s *Stroke) PositionDiff() (int, int) {
+	dx := s.currentX - s.initX
+	dy := s.currentY - s.initY
+	return dx, dy
+}
+
+func (s *Stroke) DraggingObject() any {
+	return s.draggingObject
+}
+
+func (s *Stroke) SetDraggingObject(object any) {
+	s.draggingObject = object
 }
