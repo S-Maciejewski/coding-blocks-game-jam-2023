@@ -27,6 +27,7 @@ type Ship struct {
 	previousPosX, previousPosY int
 	isLegalPlacement           bool
 	rotation                   ShipRotation
+	previousRotation           ShipRotation
 }
 
 func GenerateShips(len2, len3, len4, len5 int) []*Ship {
@@ -110,6 +111,7 @@ func NewShip(length int) *Ship {
 func (s *Ship) ResetToPreviousPosition() {
 	s.globalX = s.previousPosX
 	s.globalY = s.previousPosY
+	s.rotateTo(s.previousRotation)
 }
 
 func (s *Ship) MoveShip(move Move) {
@@ -126,13 +128,19 @@ func (s *Ship) MoveShip(move Move) {
 		panic("Impossible move attempted")
 	}
 }
-
 func (s *Ship) rotate() {
-	if s.rotation == 270 {
-		s.rotation = 0
+	rotation := s.rotation
+	if rotation == RightRotation {
+		rotation = DownRotation
 	} else {
-		s.rotation += 90
+		rotation += 90
 	}
+
+	s.rotateTo(rotation)
+}
+
+func (s *Ship) rotateTo(rotation ShipRotation) {
+	s.rotation = rotation
 	newPos := []ShipPosition{}
 
 	if s.rotation == LeftRotation {

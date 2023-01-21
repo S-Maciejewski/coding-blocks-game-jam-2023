@@ -40,6 +40,8 @@ func NewGame() *Game {
 		ship.globalY = yOffset
 		ship.previousPosX = xOffset
 		ship.previousPosY = yOffset
+		ship.rotation = LeftRotation
+		ship.previousRotation = LeftRotation
 
 		xOffset += (ship.length * shipTileSize) + drawerOffset
 	}
