@@ -85,9 +85,10 @@ func (b *Board) showLegalMoves(ship *Ship) {
 }
 
 const (
-	tileSize = 60
-	xOffset  = 50
-	yOffset  = 50
+	tileSize               = 60
+	tileSizeWithGridOffset = 58
+	xOffset                = 50
+	yOffset                = 50
 )
 
 func (b *Board) Draw(drawerImage *ebiten.Image) {
@@ -95,7 +96,7 @@ func (b *Board) Draw(drawerImage *ebiten.Image) {
 		for j := 0; j < b.size; j++ {
 			tile := b.tileAt(i, j)
 			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64((i*shipTileSize)+xOffset), float64((j*shipTileSize)+xOffset))
+			op.GeoM.Translate(float64((i*shipTileSize)+xOffset+1), float64((j*shipTileSize)+yOffset+1))
 			switch tile.state {
 			case EmptyState:
 				drawerImage.DrawImage(emptyStateImage, op)

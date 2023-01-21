@@ -1,26 +1,27 @@
 package battleships
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"image/color"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var (
-	backgroundColor = color.RGBA{0x00, 0xff, 0x0f, 0xff}
+	backgroundColor = color.RGBA{0xff, 0xff, 0xff, 0xff}
 	frameColor      = color.RGBA{0xbb, 0xad, 0xa0, 0xff}
 )
 
 var (
-	emptyStateImage        = ebiten.NewImage(shipTileSize, shipTileSize)
-	shipStateImage         = ebiten.NewImage(shipTileSize, shipTileSize)
-	shipFrontStateImage    = ebiten.NewImage(shipTileSize, shipTileSize)
-	shipHitStateImage      = ebiten.NewImage(shipTileSize, shipTileSize)
-	shipSunkStateImage     = ebiten.NewImage(shipTileSize, shipTileSize)
-	shipFrontHitStateImage = ebiten.NewImage(shipTileSize, shipTileSize)
-	bombStateImage         = ebiten.NewImage(shipTileSize, shipTileSize)
-	legalMoveImage         = ebiten.NewImage(shipTileSize, shipTileSize)
-	illegalMoveImage       = ebiten.NewImage(shipTileSize, shipTileSize)
-	hoverImage             = ebiten.NewImage(shipTileSize, shipTileSize)
+	emptyStateImage        = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	shipStateImage         = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	shipFrontStateImage    = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	shipHitStateImage      = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	shipSunkStateImage     = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	shipFrontHitStateImage = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	bombStateImage         = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	legalMoveImage         = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	illegalMoveImage       = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	hoverImage             = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
 )
 
 func init() {

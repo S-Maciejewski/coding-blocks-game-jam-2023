@@ -17,12 +17,16 @@ type Move struct {
 }
 
 type Ship struct {
-	length     int
-	health     int
-	moves      []Move
-	pos        []ShipPosition
-	isSelected bool
-	images     []ebiten.Image
+	length                     int
+	health                     int
+	moves                      []Move
+	pos                        []ShipPosition
+	isSelected                 bool
+	images                     []ebiten.Image
+	globalX, globalY           int
+	previousPosX, previousPosY int
+	isLegalPlacement           bool
+	rotation                   ShipRotation
 }
 
 func GenerateShips(len2, len3, len4, len5 int) []*Ship {
@@ -82,14 +86,30 @@ func getMovesForShipLength(length int) []Move {
 }
 
 func NewShip(length int) *Ship {
+	var pos []ShipPosition
+
+	for i := 0; i < length; i++ {
+		pos = append(pos, ShipPosition{
+			x:       i * tileSize, // TODO check if horizontal/vertical
+			y:       0,
+			isFront: i == 0,
+		})
+	}
+
 	ship := &Ship{
 		length:     length,
 		health:     length,
 		moves:      getMovesForShipLength(length),
-		pos:        []ShipPosition{},
+		pos:        pos,
 		isSelected: false,
+		rotation:   LeftRotation,
 	}
 	return ship
+}
+
+func (s *Ship) ResetToPreviousPosition() {
+	s.globalX = s.previousPosX
+	s.globalY = s.previousPosY
 }
 
 func (s *Ship) MoveShip(move Move) {
@@ -107,23 +127,98 @@ func (s *Ship) MoveShip(move Move) {
 	}
 }
 
-func (s *Ship) Rotate90() {
-	for i := 0; i < s.length; i++ {
-		s.pos[i].x, s.pos[i].y = s.pos[i].y, s.pos[i].x
+func (s *Ship) rotate() {
+	if s.rotation == 270 {
+		s.rotation = 0
+	} else {
+		s.rotation += 90
 	}
+	newPos := []ShipPosition{}
+
+	if s.rotation == LeftRotation {
+		for i := 0; i < s.length; i++ {
+			var pos ShipPosition
+			if i == 0 {
+				pos.isFront = true
+			} else {
+				pos.isFront = false
+			}
+
+			pos.x = i * tileSize
+			pos.y = 0
+			newPos = append(newPos, pos)
+		}
+	}
+
+	if s.rotation == UpRotation {
+		for i := 0; i < s.length; i++ {
+			var pos ShipPosition
+			if i == 0 {
+				pos.isFront = true
+			} else {
+				pos.isFront = false
+			}
+
+			pos.x = 0
+			pos.y = i * tileSize
+			newPos = append(newPos, pos)
+		}
+	}
+
+	if s.rotation == RightRotation {
+		for i := 0; i < s.length; i++ {
+			var pos ShipPosition
+			if i == s.length-1 {
+				pos.isFront = true
+			} else {
+				pos.isFront = false
+			}
+
+			pos.x = i * tileSize
+			pos.y = 0
+			newPos = append(newPos, pos)
+		}
+	}
+
+	if s.rotation == DownRotation {
+		for i := 0; i < s.length; i++ {
+			var pos ShipPosition
+			if i == s.length-1 {
+				pos.isFront = true
+			} else {
+				pos.isFront = false
+			}
+
+			pos.x = 0
+			pos.y = i * tileSize
+			newPos = append(newPos, pos)
+		}
+	}
+
+	s.pos = newPos
 }
 
-func (s *Ship) Rotate180() {
-	for i := 0; i < s.length; i++ {
-		s.pos[i].x = -s.pos[i].x
-		s.pos[i].y = -s.pos[i].y
-	}
-}
-
-func (s *Ship) Draw(drawerImage *ebiten.Image, startPosX, startPosY int) {
-	for i := 0; i < s.length; i++ {
+func (s *Ship) Draw(drawerImage *ebiten.Image) {
+	for _, pos := range s.pos {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64((i*shipTileSize)+startPosX), float64(startPosY))
-		drawerImage.DrawImage(shipImage, op)
+		op.GeoM.Translate(float64(pos.x+s.globalX), float64(pos.y+s.globalY))
+
+		if pos.isFront {
+			drawerImage.DrawImage(shipFrontImage, op)
+		} else {
+			drawerImage.DrawImage(shipImage, op)
+		}
 	}
+}
+
+func (s *Ship) In(x, y int) bool {
+	inBounds := false
+	for _, pos := range s.pos {
+		if pos.x+s.globalX < x && (pos.x+s.globalX+tileSize) > x && pos.y+s.globalY < y && (pos.y+s.globalY+tileSize) > y {
+			inBounds = true
+			break
+		}
+	}
+
+	return inBounds
 }

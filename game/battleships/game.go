@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 func init() {
@@ -17,13 +18,32 @@ const (
 )
 
 type Game struct {
-	board  *Board
-	ships  []*Ship
-	drawer ShipDrawer
+	board    *Board
+	ships    []*Ship
+	drawer   ShipDrawer
+	touchIDs []ebiten.TouchID
+	heldShip *Ship
 }
 
 func NewGame() *Game {
 	ships := GenerateShips(1, 1, 1, 1)
+	xOffset := drawerOffset
+	yOffset := ScreenHeight - (3 * shipTileSize)
+	for _, ship := range ships {
+
+		if (ship.length*shipTileSize)+xOffset >= (ScreenWidth - drawerOffset) {
+			xOffset = drawerOffset
+			yOffset += shipTileSize + 10
+		}
+
+		ship.globalX = xOffset
+		ship.globalY = yOffset
+		ship.previousPosX = xOffset
+		ship.previousPosY = yOffset
+
+		xOffset += (ship.length * shipTileSize) + drawerOffset
+	}
+
 	g := &Game{
 		board:  NewBoard(10),
 		ships:  ships,
@@ -37,13 +57,42 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) Update() error {
-	// g.input.Update()
-	//TODO: update board here
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		g.heldShip = g.shipAt(ebiten.CursorPosition())
+	}
+
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) && g.heldShip != nil {
+		g.heldShip.rotate()
+	}
+
+	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && g.heldShip != nil {
+		// TODO Check if valid placement
+		g.heldShip.ResetToPreviousPosition()
+		g.heldShip = nil
+	}
+
+	if g.heldShip != nil {
+		x, y := ebiten.CursorPosition()
+		g.heldShip.globalX = x
+		g.heldShip.globalY = y
+		g.heldShip.isSelected = true
+	}
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(backgroundColor)
-	g.drawer.Draw(screen)
 	g.board.Draw(screen)
+	g.drawer.Draw(screen)
+}
+
+func (g *Game) shipAt(x, y int) *Ship {
+	for i := len(g.ships) - 1; i >= 0; i-- {
+		s := g.ships[i]
+		if s.In(x, y) {
+			return s
+		}
+	}
+	return nil
 }
