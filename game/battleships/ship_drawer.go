@@ -17,7 +17,7 @@ func NewDrawer(ships []*Ship) *ShipDrawer {
 }
 
 const (
-	shipTileSize = 80
+	shipTileSize = 60
 	drawerOffset = 50
 )
 

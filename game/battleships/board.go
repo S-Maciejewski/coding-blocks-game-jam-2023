@@ -1,5 +1,11 @@
 package battleships
 
+import (
+	"image/color"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
+
 type Board struct {
 	size  int
 	tiles [][]Tile
@@ -30,6 +36,103 @@ func (b *Board) placeShip(ship *Ship) {
 			b.tileAt(pos.x, pos.y).state = ShipFrontState
 		} else {
 			b.tileAt(pos.x, pos.y).state = ShipState
+		}
+	}
+}
+
+func (b *Board) placeBomb(x, y int) {
+	b.tileAt(x, y).state = BombState
+}
+
+func (b *Board) setShipWithCalculatedMoves(ship *Ship) {
+	for _, move := range ship.moves {
+		//	for each move calculate if it's possible and set isPossible value
+		//	possible move is when ship is not out of board and there is EmptyState tile in places where ship would be after move
+
+		//	ship is not out of board
+		if ship.pos[0].x+move.xOffset >= 0 &&
+			ship.pos[0].x+move.xOffset < b.size &&
+			ship.pos[0].y+move.yOffset >= 0 &&
+			ship.pos[0].y+move.yOffset < b.size {
+			//	there is EmptyState tile in places where ship will be after move
+			move.isPossible = true
+			for i := 0; i < ship.length; i++ {
+				if b.tileAt(ship.pos[0].x+move.xOffset, ship.pos[0].y+move.yOffset).state != EmptyState {
+					move.isPossible = false
+					break
+				}
+			}
+		}
+	}
+}
+
+func (b *Board) showLegalMoves(ship *Ship) {
+	for _, move := range ship.moves {
+		if move.isPossible {
+			//	for each that ship will occupy after move set state to LegalMoveState
+			for i := 0; i < ship.length; i++ {
+				b.tileAt(ship.pos[0].x+move.xOffset, ship.pos[0].y+move.yOffset).state = LegalMoveState
+			}
+		}
+	}
+}
+
+const (
+	tileSize = 60
+	xOffset  = 50
+	yOffset  = 50
+)
+
+var (
+	emptyStateImage        = ebiten.NewImage(shipTileSize, shipTileSize)
+	shipStateImage         = ebiten.NewImage(shipTileSize, shipTileSize)
+	shipFrontStateImage    = ebiten.NewImage(shipTileSize, shipTileSize)
+	shipHitStateImage      = ebiten.NewImage(shipTileSize, shipTileSize)
+	shipSunkStateImage     = ebiten.NewImage(shipTileSize, shipTileSize)
+	shipFrontHitStateImage = ebiten.NewImage(shipTileSize, shipTileSize)
+	bombStateImage         = ebiten.NewImage(shipTileSize, shipTileSize)
+	legalMoveImage         = ebiten.NewImage(shipTileSize, shipTileSize)
+	illegalMoveImage       = ebiten.NewImage(shipTileSize, shipTileSize)
+)
+
+func init() {
+	emptyStateImage.Fill(color.RGBA{0x49, 0x80, 0xff, 0xff})
+	shipStateImage.Fill(color.RGBA{0x58, 0x58, 0x58, 0xff})
+	shipFrontStateImage.Fill(color.RGBA{0x99, 0x4c, 0x00, 0xff})
+	shipHitStateImage.Fill(color.RGBA{0xcc, 0x66, 0x00, 0xff})
+	shipSunkStateImage.Fill(color.RGBA{0x66, 0x00, 0x00, 0xff})
+	shipFrontHitStateImage.Fill(color.RGBA{0x66, 0x00, 0x00, 0xff})
+	bombStateImage.Fill(color.RGBA{0x66, 0x33, 0x00, 0xff})
+	legalMoveImage.Fill(color.RGBA{0x66, 0xff, 0xb2, 0xff})
+	illegalMoveImage.Fill(color.RGBA{0xff, 0x66, 0x66, 0xff})
+}
+
+func (b *Board) Draw(drawerImage *ebiten.Image) {
+	for i := 0; i < b.size; i++ {
+		for j := 0; j < b.size; j++ {
+			tile := b.tileAt(i, j)
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64((i*shipTileSize)+xOffset), float64((j*shipTileSize)+xOffset))
+			switch tile.state {
+			case EmptyState:
+				drawerImage.DrawImage(emptyStateImage, op)
+			case ShipState:
+				drawerImage.DrawImage(shipStateImage, op)
+			case ShipFrontState:
+				drawerImage.DrawImage(shipFrontStateImage, op)
+			case ShipHitState:
+				drawerImage.DrawImage(shipHitStateImage, op)
+			case ShipSunkState:
+				drawerImage.DrawImage(shipSunkStateImage, op)
+			case ShipFrontHitState:
+				drawerImage.DrawImage(shipFrontHitStateImage, op)
+			case BombState:
+				drawerImage.DrawImage(bombStateImage, op)
+			case LegalMoveState:
+				drawerImage.DrawImage(legalMoveImage, op)
+			case IllegalMoveState:
+				drawerImage.DrawImage(illegalMoveImage, op)
+			}
 		}
 	}
 }

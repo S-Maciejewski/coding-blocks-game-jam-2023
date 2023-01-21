@@ -37,11 +37,51 @@ func GenerateShips(len2, len3, len4, len5 int) []*Ship {
 	return ships
 }
 
+func getMovesForShipLength(length int) []Move {
+	moves2 := []Move{
+		{1, 0, false},
+		{-1, 0, false},
+	}
+	moves3 := append(moves2, []Move{
+		{2, 0, false},
+		{-2, 0, false},
+		{2, 1, false},
+		{2, -1, false},
+	}...)
+	moves4 := append(moves3, []Move{
+		{3, 0, false},
+		{-3, 0, false},
+		{3, 1, false},
+		{3, -1, false},
+	}...)
+	moves5 := append(moves4, []Move{
+		{4, 0, false},
+		{-4, 0, false},
+		{4, 1, false},
+		{4, -1, false},
+		{4, 2, false},
+		{4, -2, false},
+	}...)
+	switch length {
+	case 2:
+		return moves2
+	case 3:
+		return moves3
+	case 4:
+		return moves4
+	case 5:
+		return moves5
+	default:
+		return []Move{}
+	}
+}
+
 func NewShip(length int) *Ship {
+
 	ship := &Ship{
 		length:     length,
 		health:     length,
-		moves:      []Move{},
+		moves:      getMovesForShipLength(length),
 		pos:        []ShipPosition{},
 		isSelected: false,
 	}
