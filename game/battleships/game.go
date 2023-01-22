@@ -18,11 +18,12 @@ const (
 )
 
 type Game struct {
-	board    *Board
-	ships    []*Ship
-	drawer   ShipDrawer
-	heldShip *Ship
-	shooter  *Shooter
+	board             *Board
+	ships             []*Ship
+	drawer            ShipDrawer
+	heldShip          *Ship
+	shooter           *Shooter
+	areAllShipsPlaced bool
 }
 
 func NewGame() *Game {
@@ -71,6 +72,11 @@ func (g *Game) Update() error {
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && g.heldShip != nil {
 		if g.heldShip.isLegalPlacement {
 			g.board.placeShip(g.heldShip)
+			changeAllShipsPlaced(g)
+			if g.areAllShipsPlaced {
+				bomb := g.shooter.GetNewBomb(g.board)
+				g.board.placeBomb(bomb.x, bomb.y)
+			}
 		} else {
 			g.heldShip.ResetToPreviousPosition()
 		}
@@ -89,6 +95,18 @@ func (g *Game) Update() error {
 	}
 
 	return nil
+}
+
+func changeAllShipsPlaced(g *Game) {
+	if !g.areAllShipsPlaced {
+		g.areAllShipsPlaced = true
+		for _, ship := range g.ships {
+			if len(ship.placedAtTiles) == 0 {
+				g.areAllShipsPlaced = false
+				break
+			}
+		}
+	}
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
