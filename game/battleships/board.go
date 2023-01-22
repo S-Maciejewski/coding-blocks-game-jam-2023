@@ -1,14 +1,16 @@
 package battleships
 
 import (
+	"fmt"
+	"image/color"
+	"log"
+	"strconv"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
-	"image/color"
-	"log"
-	"strconv"
 )
 
 var (
@@ -169,13 +171,21 @@ func (b *Board) getBombAtTile(x, y int) *Bomb {
 }
 
 func (b *Board) reduceBombLifetimes() {
+	var bombs []*Bomb
 	for _, bomb := range b.bombs {
 		bomb.turnsToLive--
 
 		if bomb.turnsToLive == 0 {
 			b.tileAt(bomb.x, bomb.y).state = BombExplodedState
 		}
+
+		if bomb.turnsToLive == -5 {
+			b.tileAt(bomb.x, bomb.y).state = EmptyState
+		} else {
+			bombs = append(bombs, bomb)
+		}
 	}
+	b.bombs = bombs
 }
 
 func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
