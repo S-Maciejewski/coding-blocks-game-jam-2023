@@ -1,8 +1,6 @@
 package battleships
 
 import (
-	"fmt"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -246,14 +244,4 @@ func (s *Ship) In(x, y int) bool {
 	}
 
 	return inBounds
-}
-
-func (s *Ship) checkIfBombHit(board *Board) {
-	for _, pos := range s.pos {
-		bombHit := board.getBombAtTile(pos.x, pos.y)
-		if bombHit != nil && bombHit.turnsToLive <= 0 {
-			s.isDestroyed = true
-			fmt.Println("HIT")
-		}
-	}
 }
