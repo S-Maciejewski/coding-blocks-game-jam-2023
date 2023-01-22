@@ -39,3 +39,60 @@ func TestNewBoard(t *testing.T) {
 		})
 	}
 }
+
+func TestBoard_calculateSingleMoveForShip(t *testing.T) {
+	type fields struct {
+		size  int
+		tiles [][]Tile
+		bombs []*Bomb
+	}
+	type args struct {
+		ship *Ship
+		move *Move
+	}
+	tests := []struct {
+		name string
+		args args
+		want Move
+	}{
+		{
+			name: "Len2 ship can move 1 to the front with right rotation",
+			args: args{
+				ship: &Ship{
+					length:   2,
+					rotation: RightRotation,
+					gridPos: []ShipPosition{
+						{
+							x:       5,
+							y:       5,
+							isFront: true,
+						},
+						{
+							x:       4,
+							y:       5,
+							isFront: false,
+						},
+					},
+				},
+				move: &Move{
+					xOffset:    1,
+					yOffset:    0,
+					isPossible: false,
+				},
+			},
+			want: Move{
+				xOffset:    1,
+				yOffset:    0,
+				isPossible: true,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := NewBoard(10)
+			if got := b.calculateSingleMoveForShip(tt.args.ship, tt.args.move); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("calculateSingleMoveForShip() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
