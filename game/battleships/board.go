@@ -1,15 +1,15 @@
 package battleships
 
 import (
-	"image/color"
-	"log"
-	"strconv"
-
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
+	"image/color"
+	"log"
+	"strconv"
 )
 
 var (
@@ -113,6 +113,17 @@ func (b *Board) tilesForShipPlacement(x, y int, ship *Ship) []*Tile {
 	return tiles
 }
 
+func (b *Board) clearLegalMoves() {
+	for i := 0; i < b.size; i++ {
+		for j := 0; j < b.size; j++ {
+			tile := b.tileAt(i, j)
+			if tile.state == LegalMoveState {
+				tile.state = EmptyState
+			}
+		}
+	}
+}
+
 func (b *Board) placeShip(ship *Ship) {
 	for _, tile := range ship.placedAtTiles {
 		tile.state = EmptyState
@@ -132,8 +143,15 @@ func (b *Board) placeShip(ship *Ship) {
 	}
 
 	ship.placedAtTiles = tiles
+	gridPos := []ShipPosition{}
+	for _, tile := range tiles {
+		gridPos = append(gridPos, ShipPosition{x: tile.x, y: tile.y, isFront: tile.state == ShipFrontState})
+	}
+	ship.gridPos = gridPos
 	ship.globalX = startTile.x*tileSize + xOffset
 	ship.globalY = startTile.y*tileSize + yOffset
+
+	b.clearLegalMoves()
 }
 
 func (b *Board) placeBomb(bomb *Bomb) {
@@ -162,36 +180,49 @@ func (b *Board) reduceBombLifetimes() {
 }
 
 func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
+	newMoves := []Move{}
 	for _, move := range ship.moves {
 		//	for each move calculate if it's possible and set isPossible value
 		//	possible move is when ship is not out of board and there is EmptyState tile in places where ship would be after move
 
-		shipFrontPos := ship.pos[0]
-		if !shipFrontPos.isFront {
-			shipFrontPos = ship.pos[ship.length-1]
+		//shipFrontPos := ship.gridPos[0]
+		//if !shipFrontPos.isFront {
+		//	shipFrontPos = ship.gridPos[ship.length-1]
+		//}
+		if !ship.gridPos[0].isFront {
+			fmt.Println("ship.gridPos", ship.gridPos)
+			//	reverse ship.gridPos list
+			for i, j := 0, len(ship.gridPos)-1; i < j; i, j = i+1, j-1 {
+				ship.gridPos[i], ship.gridPos[j] = ship.gridPos[j], ship.gridPos[i]
+			}
+			fmt.Println("ship.gridPos after", ship.gridPos)
+
 		}
 
-		//	ship is not out of board
-		if shipFrontPos.x+move.xOffset >= 0 &&
-			shipFrontPos.x+move.xOffset < b.size &&
-			shipFrontPos.y+move.yOffset >= 0 &&
-			shipFrontPos.y+move.yOffset < b.size {
-			//	there is EmptyState tile in places where ship will be after move
-			tileClear := true
-			for i := 0; i < ship.length; i++ {
-				if ship.pos[i].x+move.xOffset >= b.size || ship.pos[i].y+move.yOffset >= b.size ||
-					ship.pos[i].x+move.xOffset < 0 || ship.pos[i].y+move.yOffset < 0 {
-					tileClear = false
-					break
-				}
-				if b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state != EmptyState {
-					tileClear = false
-					break
-				}
+		//	there is EmptyState tile in places where ship will be after move
+		tileClear := true
+		for i := 0; i < ship.length; i++ {
+			// check if ship would not end up out of the board
+			if ship.gridPos[i].x+move.xOffset >= b.size || ship.gridPos[i].y+move.yOffset >= b.size ||
+				ship.gridPos[i].x+move.xOffset < 0 || ship.gridPos[i].y+move.yOffset < 0 {
+				tileClear = false
+				break
 			}
-			move.isPossible = tileClear
+			if b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != EmptyState &&
+				b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != ShipState {
+				tileClear = false
+				break
+			}
 		}
+		newMove := Move{
+			xOffset:    move.xOffset,
+			yOffset:    move.yOffset,
+			isPossible: tileClear,
+		}
+		move = newMove
+		newMoves = append(newMoves, move)
 	}
+	ship.moves = newMoves
 }
 
 func (b *Board) showLegalMoves(ship *Ship) {
@@ -199,9 +230,9 @@ func (b *Board) showLegalMoves(ship *Ship) {
 		if move.isPossible {
 			// set LegalMoveState for each tile where ship would be after move unless it'll be in place where ship is already
 			for i := 0; i < ship.length; i++ {
-				if b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state != ShipState &&
-					b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state != ShipFrontState {
-					b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state = LegalMoveState
+				if b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != ShipState &&
+					b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != ShipFrontState {
+					b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state = LegalMoveState
 				}
 			}
 		}

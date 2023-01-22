@@ -21,6 +21,7 @@ type Ship struct {
 	health                     int
 	moves                      []Move
 	pos                        []ShipPosition
+	gridPos                    []ShipPosition
 	isSelected                 bool
 	images                     []ebiten.Image
 	globalX, globalY           int
