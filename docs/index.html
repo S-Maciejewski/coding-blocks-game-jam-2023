@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-size: larger;
+    }
     #content {
         display: flex;
         flex-direction: row;
@@ -31,6 +36,17 @@
                 (their available moves)</p>
             <p>Bombs drop with a timer and explode once the timer (in turns) expires</p>
             <p>You can't move over destroyed ships and bombs that exploded recently</p>
+
+            <h2>Controls</h2>
+            <h4>
+                <strong>R - restart game</strong>
+            </h4>
+            <h4>
+                <strong>Click and drag - move ships</strong>
+            </h4>
+            <h4>
+                <strong>Right click (while moving ship) - rotate ship</strong>
+            </h4>
         </div>
         <div id="game">
             <iframe src="game.html" width="710" height="1010"></iframe>
