@@ -23,3 +23,7 @@ Using scoop makes it easier to update and manage in the future.
 ### Editor
 I recommend using GoLand by Jetbrains but VSCode with the Go extension will work fine.
 
+## Building
+Game can be built for Web Assembly simply by running `docker-compose up`.
+
+Specifying different target system (Windows, Linux, Mac, Android or iOS) and architecture is possible - simply change env variables in docker-compose.yml
