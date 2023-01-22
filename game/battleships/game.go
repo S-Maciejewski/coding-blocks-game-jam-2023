@@ -84,6 +84,8 @@ func (g *Game) Update() error {
 		g.heldShip.globalY = y
 		g.heldShip.isSelected = true
 		g.board.SetHighlight(g.heldShip)
+		g.board.calculatePossibleMovesForShip(g.heldShip)
+		g.board.showLegalMoves(g.heldShip)
 	}
 
 	return nil

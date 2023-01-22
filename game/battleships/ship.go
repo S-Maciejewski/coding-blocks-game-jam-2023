@@ -92,7 +92,7 @@ func NewShip(length int) *Ship {
 
 	for i := 0; i < length; i++ {
 		pos = append(pos, ShipPosition{
-			x:       i * tileSize, // TODO check if horizontal/vertical
+			x:       i,
 			y:       0,
 			isFront: i == 0,
 		})
@@ -159,7 +159,7 @@ func (s *Ship) rotateTo(rotation ShipRotation) {
 				pos.isFront = false
 			}
 
-			pos.x = i * tileSize
+			pos.x = i
 			pos.y = 0
 			newPos = append(newPos, pos)
 		}
@@ -175,7 +175,7 @@ func (s *Ship) rotateTo(rotation ShipRotation) {
 			}
 
 			pos.x = 0
-			pos.y = i * tileSize
+			pos.y = i
 			newPos = append(newPos, pos)
 		}
 	}
@@ -189,7 +189,7 @@ func (s *Ship) rotateTo(rotation ShipRotation) {
 				pos.isFront = false
 			}
 
-			pos.x = i * tileSize
+			pos.x = i
 			pos.y = 0
 			newPos = append(newPos, pos)
 		}
@@ -205,7 +205,7 @@ func (s *Ship) rotateTo(rotation ShipRotation) {
 			}
 
 			pos.x = 0
-			pos.y = i * tileSize
+			pos.y = i
 			newPos = append(newPos, pos)
 		}
 	}
@@ -216,7 +216,7 @@ func (s *Ship) rotateTo(rotation ShipRotation) {
 func (s *Ship) Draw(drawerImage *ebiten.Image) {
 	for _, pos := range s.pos {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(pos.x+s.globalX), float64(pos.y+s.globalY))
+		op.GeoM.Translate(float64((pos.x*tileSize)+s.globalX), float64((pos.y*tileSize)+s.globalY))
 
 		if pos.isFront {
 			drawerImage.DrawImage(shipFrontImage, op)
@@ -229,7 +229,7 @@ func (s *Ship) Draw(drawerImage *ebiten.Image) {
 func (s *Ship) In(x, y int) bool {
 	inBounds := false
 	for _, pos := range s.pos {
-		if pos.x+s.globalX < x && (pos.x+s.globalX+tileSize) > x && pos.y+s.globalY < y && (pos.y+s.globalY+tileSize) > y {
+		if (pos.x*tileSize)+s.globalX < x && ((pos.x*tileSize)+s.globalX+tileSize) > x && (pos.y*tileSize)+s.globalY < y && ((pos.y*tileSize)+s.globalY+tileSize) > y {
 			inBounds = true
 			break
 		}
