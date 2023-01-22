@@ -125,6 +125,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	text.Draw(screen, "Highscore: "+strconv.Itoa(g.highScore), f, 50, (tileSize*g.board.size)+yOffset+120, color.Black)
 	g.board.Draw(screen)
 	g.drawer.Draw(screen)
+	g.board.DrawOverlay(screen)
 }
 
 func (g *Game) shipAt(x, y int) *Ship {

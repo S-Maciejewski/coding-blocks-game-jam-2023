@@ -8,7 +8,6 @@ const (
 	ShipFrontState
 	ShipHitState
 	ShipSunkState
-	ShipFrontHitState
 	BombState
 	BombExplodedState
 	LegalMoveState

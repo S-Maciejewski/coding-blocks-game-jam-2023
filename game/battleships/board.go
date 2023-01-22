@@ -127,7 +127,11 @@ func (b *Board) clearLegalMoves() {
 
 func (b *Board) placeShip(ship *Ship) {
 	for _, tile := range ship.placedAtTiles {
-		tile.state = EmptyState
+		if b.getBombAtTile(tile.x, tile.y) != nil {
+			tile.state = BombState
+		} else {
+			tile.state = EmptyState
+		}
 	}
 
 	startTile := b.tileAtWorldPos(ship.globalX, ship.globalY)
@@ -272,8 +276,6 @@ func (b *Board) Draw(drawerImage *ebiten.Image) {
 				drawerImage.DrawImage(shipHitStateImage, op)
 			case ShipSunkState:
 				drawerImage.DrawImage(shipSunkStateImage, op)
-			case ShipFrontHitState:
-				drawerImage.DrawImage(shipFrontHitStateImage, op)
 			case BombState:
 				f := mplusBigFont
 				drawerImage.DrawImage(bombStateImage, op)
@@ -291,6 +293,20 @@ func (b *Board) Draw(drawerImage *ebiten.Image) {
 
 			if tile.isHovered {
 				drawerImage.DrawImage(hoverImage, op)
+			}
+		}
+	}
+}
+func (b *Board) DrawOverlay(drawerImage *ebiten.Image) {
+	f := mplusBigFont
+	for _, bomb := range b.bombs {
+		if bomb.turnsToLive > 0 {
+			tile := b.tileAt(bomb.x, bomb.y)
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Translate(float64((tile.x*shipTileSize)+xOffset), float64((tile.y*shipTileSize)+yOffset))
+			if tile.state == ShipState || tile.state == ShipFrontState {
+				drawerImage.DrawImage(shipInDangerStateImage, op)
+				text.Draw(drawerImage, strconv.FormatInt(int64(bomb.turnsToLive), 10), f, bomb.x*tileSize+xOffset+13, (bomb.y+1)*tileSize+yOffset-11, color.Black)
 			}
 		}
 	}
