@@ -1,3 +1,6 @@
+# Game
+The game is wirtten in Go with ebiten and deployed here: https://s-maciejewski.github.io/coding-blocks-game-jam-2023/game.html
+
 # Setup
 This is a guide to setting up a development environment for the project.
 
