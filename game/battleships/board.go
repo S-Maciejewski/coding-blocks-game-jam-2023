@@ -211,28 +211,24 @@ func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
 		switch ship.rotation {
 		case RightRotation:
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &move))
-			break
 		case LeftRotation:
 			rotatedMove := Move{
 				xOffset: -move.xOffset,
 				yOffset: move.yOffset,
 			}
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
-			break
 		case UpRotation:
 			rotatedMove := Move{
 				xOffset: move.yOffset,
 				yOffset: -move.xOffset,
 			}
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
-			break
 		case DownRotation:
 			rotatedMove := Move{
 				xOffset: -move.yOffset,
 				yOffset: move.xOffset,
 			}
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
-			break
 		}
 	}
 	ship.moves = newMoves

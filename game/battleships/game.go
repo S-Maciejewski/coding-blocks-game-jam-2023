@@ -72,6 +72,7 @@ func (g *Game) Update() error {
 	}
 
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) && g.heldShip != nil {
+		g.board.clearLegalMoves()
 		g.heldShip.rotate()
 	}
 
@@ -99,6 +100,7 @@ func (g *Game) Update() error {
 				}
 			}
 		} else {
+			g.board.clearLegalMoves()
 			g.heldShip.ResetToPreviousPosition()
 		}
 		g.heldShip = nil
