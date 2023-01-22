@@ -1,5 +1,9 @@
 # Game
-The game is wirtten in Go with ebiten and deployed here: https://s-maciejewski.github.io/coding-blocks-game-jam-2023/game.html
+## Reverse battleships
+The game is wirtten in Go with ebiten and deployed here: https://s-maciejewski.github.io/coding-blocks-game-jam-2023
+
+### Description
+Since the theme is _Everything is backwards_ we've decided to make a classic battleships with a twist - you're playing as ships evading bombs
 
 # Setup
 This is a guide to setting up a development environment for the project.
