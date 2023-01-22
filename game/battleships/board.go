@@ -1,7 +1,6 @@
 package battleships
 
 import (
-	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -182,47 +181,56 @@ func (b *Board) reduceBombLifetimes() {
 func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
 	newMoves := []Move{}
 	for _, move := range ship.moves {
-		//	for each move calculate if it's possible and set isPossible value
-		//	possible move is when ship is not out of board and there is EmptyState tile in places where ship would be after move
-
-		//shipFrontPos := ship.gridPos[0]
-		//if !shipFrontPos.isFront {
-		//	shipFrontPos = ship.gridPos[ship.length-1]
-		//}
-		if !ship.gridPos[0].isFront {
-			fmt.Println("ship.gridPos", ship.gridPos)
-			//	reverse ship.gridPos list
-			for i, j := 0, len(ship.gridPos)-1; i < j; i, j = i+1, j-1 {
-				ship.gridPos[i], ship.gridPos[j] = ship.gridPos[j], ship.gridPos[i]
+		//	for each move calculate if it's possible and set isPossible value, respecting rotation
+		switch ship.rotation {
+		case RightRotation:
+			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &move))
+		case LeftRotation:
+			rotatedMove := Move{
+				xOffset: -move.xOffset,
+				yOffset: move.yOffset,
 			}
-			fmt.Println("ship.gridPos after", ship.gridPos)
-
-		}
-
-		//	there is EmptyState tile in places where ship will be after move
-		tileClear := true
-		for i := 0; i < ship.length; i++ {
-			// check if ship would not end up out of the board
-			if ship.gridPos[i].x+move.xOffset >= b.size || ship.gridPos[i].y+move.yOffset >= b.size ||
-				ship.gridPos[i].x+move.xOffset < 0 || ship.gridPos[i].y+move.yOffset < 0 {
-				tileClear = false
-				break
+			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
+		case UpRotation:
+			rotatedMove := Move{
+				xOffset: move.yOffset,
+				yOffset: -move.xOffset,
 			}
-			if b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != EmptyState &&
-				b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != ShipState {
-				tileClear = false
-				break
+			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
+		case DownRotation:
+			rotatedMove := Move{
+				xOffset: -move.yOffset,
+				yOffset: move.xOffset,
 			}
+			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
 		}
-		newMove := Move{
-			xOffset:    move.xOffset,
-			yOffset:    move.yOffset,
-			isPossible: tileClear,
-		}
-		move = newMove
-		newMoves = append(newMoves, move)
 	}
 	ship.moves = newMoves
+}
+
+func (b *Board) calculateSingleMoveForShip(ship *Ship, move *Move) Move {
+	//	possible move is when ship is not out of board and there is EmptyState tile in places where ship would be after move
+	tileClear := true
+	//	there is EmptyState tile in places where ship will be after move
+	for i := 0; i < ship.length; i++ {
+		// check if ship would not end up out of the board
+		if ship.gridPos[i].x+move.xOffset >= b.size || ship.gridPos[i].y+move.yOffset >= b.size ||
+			ship.gridPos[i].x+move.xOffset < 0 || ship.gridPos[i].y+move.yOffset < 0 {
+			tileClear = false
+			break
+		}
+		if b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != EmptyState &&
+			b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != ShipState {
+			tileClear = false
+			break
+		}
+	}
+	newMove := Move{
+		xOffset:    move.xOffset,
+		yOffset:    move.yOffset,
+		isPossible: tileClear,
+	}
+	return newMove
 }
 
 func (b *Board) showLegalMoves(ship *Ship) {
