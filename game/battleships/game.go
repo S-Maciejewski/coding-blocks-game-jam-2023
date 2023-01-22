@@ -1,11 +1,14 @@
 package battleships
 
 import (
+	"image/color"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
 func init() {
@@ -24,6 +27,8 @@ type Game struct {
 	heldShip          *Ship
 	shooter           *Shooter
 	areAllShipsPlaced bool
+	score             int
+	highScore         int
 }
 
 func NewGame() *Game {
@@ -76,9 +81,9 @@ func (g *Game) Update() error {
 			if g.areAllShipsPlaced {
 				bomb := g.shooter.GetNewBomb(g.board)
 				g.board.placeBomb(&bomb)
+				g.board.reduceBombLifetimes()
+				g.score++
 			}
-
-			g.board.reduceBombLifetimes()
 		} else {
 			g.heldShip.ResetToPreviousPosition()
 		}
@@ -115,6 +120,9 @@ func changeAllShipsPlaced(g *Game) {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(backgroundColor)
+	f := mplusBigFont
+	text.Draw(screen, "Score: "+strconv.Itoa(g.score), f, 50, (tileSize*g.board.size)+yOffset+60, color.Black)
+	text.Draw(screen, "Highscore: "+strconv.Itoa(g.highScore), f, 50, (tileSize*g.board.size)+yOffset+120, color.Black)
 	g.board.Draw(screen)
 	g.drawer.Draw(screen)
 }
