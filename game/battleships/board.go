@@ -1,7 +1,6 @@
 package battleships
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"strconv"
@@ -155,6 +154,9 @@ func (b *Board) placeShip(ship *Ship) {
 	ship.gridPos = gridPos
 	ship.globalX = startTile.x*tileSize + xOffset
 	ship.globalY = startTile.y*tileSize + yOffset
+	ship.previousPosX = ship.globalX
+	ship.previousPosY = ship.globalY
+	ship.previousRotation = ship.rotation
 
 	b.clearLegalMoves()
 }
@@ -206,7 +208,6 @@ func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
 	newMoves := []Move{}
 	for _, move := range ship.moves {
 		//	for each move calculate if it's possible and set isPossible value, respecting rotation
-		fmt.Println("Ship rotation", ship.rotation)
 		switch ship.rotation {
 		case RightRotation:
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &move))
