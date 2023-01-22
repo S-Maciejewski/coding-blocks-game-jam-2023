@@ -1,7 +1,6 @@
 package battleships
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 	"strconv"
