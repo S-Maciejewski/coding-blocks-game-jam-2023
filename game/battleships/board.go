@@ -110,6 +110,11 @@ func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
 			//	there is EmptyState tile in places where ship will be after move
 			tileClear := true
 			for i := 0; i < ship.length; i++ {
+				if ship.pos[i].x+move.xOffset >= b.size || ship.pos[i].y+move.yOffset >= b.size ||
+					ship.pos[i].x+move.xOffset < 0 || ship.pos[i].y+move.yOffset < 0 {
+					tileClear = false
+					break
+				}
 				if b.tileAt(ship.pos[i].x+move.xOffset, ship.pos[i].y+move.yOffset).state != EmptyState {
 					tileClear = false
 					break
