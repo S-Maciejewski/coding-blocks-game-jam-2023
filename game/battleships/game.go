@@ -33,7 +33,7 @@ type Game struct {
 }
 
 func NewGame() *Game {
-	ships := GenerateShips(1, 1, 1, 1)
+	ships := GenerateShips(2, 1, 1, 1)
 	xOffset := drawerOffset
 	yOffset := ScreenHeight - (3 * shipTileSize)
 	for _, ship := range ships {
@@ -80,7 +80,7 @@ func (g *Game) Update() error {
 			g.board.placeShip(g.heldShip)
 			changeAllShipsPlaced(g)
 			if g.areAllShipsPlaced {
-				for i := 0; i < 5; i++ {
+				for i := 0; i < 3; i++ {
 					bomb := g.shooter.GetNewBomb(g.board)
 					g.board.placeBomb(&bomb)
 				}
