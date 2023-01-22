@@ -1,2 +1,39 @@
 <!DOCTYPE html>
-<iframe src="game.html" width="710" height="1010"></iframe>
+<style>
+    #content {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    #description {
+        width: 30%;
+        padding: 10px;
+    }
+
+    #game {
+        width: 70%;
+        padding: 10px;
+    }
+
+    #game iframe {
+        border: 1px solid black;
+    }
+</style>
+
+<body>
+    <div id="content">
+        <div id="description">
+            <h1>Reverse Battleships</h1>
+            <p>Your goal is to <strong>place all of your ships</strong> first, then when the bombs start dropping try to
+                move your ships to avoid getting hit</p>
+            <p>Click and drag the ships into position. Once they are placed you'll be able to move them to green tiles
+                (their available moves)</p>
+            <p>Bombs drop with a timer and explode once the timer (in turns) expires</p>
+            <p>You can't move over destroyed ships and bombs that exploded recently</p>
+        </div>
+        <div id="game">
+            <iframe src="game.html" width="710" height="1010"></iframe>
+        </div>
+    </div>
+</body>
