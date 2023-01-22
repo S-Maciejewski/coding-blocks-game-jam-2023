@@ -211,6 +211,10 @@ func (s *Ship) rotateTo(rotation ShipRotation) {
 		}
 	}
 
+	for _, move := range s.moves {
+		move.isPossible = false
+	}
+
 	s.pos = newPos
 }
 
