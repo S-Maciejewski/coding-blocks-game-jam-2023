@@ -366,19 +366,8 @@ func (b *Board) SetHighlight(ship *Ship) {
 			}
 		}
 
-		if len(ship.placedAtTiles) > 0 {
-			exactMatch := true
-			for _, tile := range highlightedTiles {
-				for _, placedTile := range ship.placedAtTiles {
-					if placedTile.x != tile.x || placedTile.y != tile.y {
-						exactMatch = false
-						break
-					}
-				}
-			}
-			if exactMatch {
-				placementLegal = false
-			}
+		if len(ship.gridPos) > 0 && ship.gridPos[0].x == tile.x && ship.gridPos[0].y == tile.y && ship.rotation == ship.previousRotation {
+			placementLegal = false
 		}
 
 		ship.isLegalPlacement = placementLegal
