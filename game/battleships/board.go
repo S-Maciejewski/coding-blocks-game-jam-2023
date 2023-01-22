@@ -365,6 +365,22 @@ func (b *Board) SetHighlight(ship *Ship) {
 				//	ship is not placed yet
 			}
 		}
+
+		if len(ship.placedAtTiles) > 0 {
+			exactMatch := true
+			for _, tile := range highlightedTiles {
+				for _, placedTile := range ship.placedAtTiles {
+					if placedTile.x != tile.x || placedTile.y != tile.y {
+						exactMatch = false
+						break
+					}
+				}
+			}
+			if exactMatch {
+				placementLegal = false
+			}
+		}
+
 		ship.isLegalPlacement = placementLegal
 		if placementLegal {
 			for _, tile := range highlightedTiles {
