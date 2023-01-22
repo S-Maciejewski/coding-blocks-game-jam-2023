@@ -29,6 +29,7 @@ type Game struct {
 	areAllShipsPlaced bool
 	score             int
 	highScore         int
+	isFinished        bool
 }
 
 func NewGame() *Game {
@@ -82,7 +83,18 @@ func (g *Game) Update() error {
 				bomb := g.shooter.GetNewBomb(g.board)
 				g.board.placeBomb(&bomb)
 				g.board.reduceBombLifetimes()
-				g.score++
+				g.board.checkBombHits(g.ships)
+
+				isGameFinished := checkIfGameFinished(g)
+
+				if isGameFinished {
+					if g.score > g.highScore {
+						g.highScore = g.score
+					}
+					g.isFinished = true
+				} else {
+					g.score++
+				}
 			}
 		} else {
 			g.heldShip.ResetToPreviousPosition()
@@ -103,7 +115,28 @@ func (g *Game) Update() error {
 		}
 	}
 
+	if inpututil.IsKeyJustReleased(ebiten.KeyR) {
+		ng := NewGame()
+		g.ships = ng.ships
+		g.score = 0
+		g.shooter = ng.shooter
+		g.drawer = ng.drawer
+		g.board = ng.board
+		g.isFinished = false
+	}
+
 	return nil
+}
+
+func checkIfGameFinished(g *Game) bool {
+	isGameFinished := true
+	for _, ship := range g.ships {
+		if !ship.isDestroyed {
+			isGameFinished = false
+			break
+		}
+	}
+	return isGameFinished
 }
 
 func changeAllShipsPlaced(g *Game) {
@@ -123,6 +156,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	f := mplusBigFont
 	text.Draw(screen, "Score: "+strconv.Itoa(g.score), f, 50, (tileSize*g.board.size)+yOffset+60, color.Black)
 	text.Draw(screen, "Highscore: "+strconv.Itoa(g.highScore), f, 50, (tileSize*g.board.size)+yOffset+120, color.Black)
+	if g.isFinished {
+		text.Draw(screen, "Click R to restart", f, 50, (tileSize*g.board.size)+yOffset+180, color.Black)
+	}
 	g.board.Draw(screen)
 	g.drawer.Draw(screen)
 	g.board.DrawOverlay(screen)

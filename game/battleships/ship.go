@@ -1,6 +1,8 @@
 package battleships
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -23,13 +25,13 @@ type Ship struct {
 	pos                        []ShipPosition
 	gridPos                    []ShipPosition
 	isSelected                 bool
-	images                     []ebiten.Image
 	globalX, globalY           int
 	previousPosX, previousPosY int
 	isLegalPlacement           bool
 	rotation                   ShipRotation
 	previousRotation           ShipRotation
 	placedAtTiles              []*Tile
+	isDestroyed                bool
 }
 
 func GenerateShips(len2, len3, len4, len5 int) []*Ship {
@@ -219,7 +221,9 @@ func (s *Ship) Draw(drawerImage *ebiten.Image) {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64((pos.x*tileSize)+s.globalX), float64((pos.y*tileSize)+s.globalY))
 
-		if pos.isFront {
+		if s.isDestroyed {
+			drawerImage.DrawImage(shipSunkStateImage, op)
+		} else if pos.isFront {
 			drawerImage.DrawImage(shipFrontImage, op)
 		} else {
 			drawerImage.DrawImage(shipImage, op)
@@ -229,6 +233,11 @@ func (s *Ship) Draw(drawerImage *ebiten.Image) {
 
 func (s *Ship) In(x, y int) bool {
 	inBounds := false
+
+	if s.isDestroyed {
+		return inBounds
+	}
+
 	for _, pos := range s.pos {
 		if (pos.x*tileSize)+s.globalX < x && ((pos.x*tileSize)+s.globalX+tileSize) > x && (pos.y*tileSize)+s.globalY < y && ((pos.y*tileSize)+s.globalY+tileSize) > y {
 			inBounds = true
@@ -237,4 +246,14 @@ func (s *Ship) In(x, y int) bool {
 	}
 
 	return inBounds
+}
+
+func (s *Ship) checkIfBombHit(board *Board) {
+	for _, pos := range s.pos {
+		bombHit := board.getBombAtTile(pos.x, pos.y)
+		if bombHit != nil && bombHit.turnsToLive <= 0 {
+			s.isDestroyed = true
+			fmt.Println("HIT")
+		}
+	}
 }

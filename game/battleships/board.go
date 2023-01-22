@@ -191,6 +191,16 @@ func (b *Board) reduceBombLifetimes() {
 	b.bombs = bombs
 }
 
+func (b *Board) checkBombHits(ships []*Ship) {
+	for _, ship := range ships {
+		for _, gridPos := range ship.gridPos {
+			if b.tileAt(gridPos.x, gridPos.y).state == BombExplodedState {
+				ship.isDestroyed = true
+			}
+		}
+	}
+}
+
 func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
 	newMoves := []Move{}
 	for _, move := range ship.moves {
