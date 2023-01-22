@@ -1,6 +1,7 @@
 package battleships
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 	"strconv"
@@ -195,27 +196,32 @@ func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
 	newMoves := []Move{}
 	for _, move := range ship.moves {
 		//	for each move calculate if it's possible and set isPossible value, respecting rotation
+		fmt.Println("Ship rotation", ship.rotation)
 		switch ship.rotation {
 		case RightRotation:
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &move))
+			break
 		case LeftRotation:
 			rotatedMove := Move{
 				xOffset: -move.xOffset,
 				yOffset: move.yOffset,
 			}
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
+			break
 		case UpRotation:
 			rotatedMove := Move{
 				xOffset: move.yOffset,
 				yOffset: -move.xOffset,
 			}
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
+			break
 		case DownRotation:
 			rotatedMove := Move{
 				xOffset: -move.yOffset,
 				yOffset: move.xOffset,
 			}
 			newMoves = append(newMoves, b.calculateSingleMoveForShip(ship, &rotatedMove))
+			break
 		}
 	}
 	ship.moves = newMoves
@@ -233,7 +239,8 @@ func (b *Board) calculateSingleMoveForShip(ship *Ship, move *Move) Move {
 			break
 		}
 		if b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != EmptyState &&
-			b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != ShipState {
+			b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != ShipState &&
+			b.tileAt(ship.gridPos[i].x+move.xOffset, ship.gridPos[i].y+move.yOffset).state != ShipFrontState {
 			tileClear = false
 			break
 		}
@@ -326,9 +333,32 @@ func (b *Board) SetHighlight(ship *Ship) {
 
 	if tile != nil {
 		highlightedTiles := b.tilesForShipPlacement(tile.x, tile.y, ship)
+		placementLegal := true
 		for _, tile := range highlightedTiles {
-			tile.isHovered = true
-			ship.isLegalPlacement = true
+			if len(ship.placedAtTiles) > 0 {
+				if tile.state == ShipState || tile.state == ShipFrontState {
+					//	check if this ship is already placed at this tile
+					tileIsPartOfCurrentShip := false
+					for _, placedTile := range ship.placedAtTiles {
+						if placedTile.x == tile.x && placedTile.y == tile.y {
+							tileIsPartOfCurrentShip = true
+						}
+					}
+					if !tileIsPartOfCurrentShip {
+						placementLegal = false
+					}
+				} else if tile.state != LegalMoveState {
+					placementLegal = false
+				}
+			} else {
+				//	ship is not placed yet
+			}
+		}
+		ship.isLegalPlacement = placementLegal
+		if placementLegal {
+			for _, tile := range highlightedTiles {
+				tile.isHovered = true
+			}
 		}
 	}
 }
