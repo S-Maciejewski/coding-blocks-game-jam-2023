@@ -1,12 +1,60 @@
 package battleships
 
 import (
+	"image/color"
+	"log"
+	"strconv"
+
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
+)
+
+var (
+	mplusSmallFont  font.Face
+	mplusNormalFont font.Face
+	mplusBigFont    font.Face
 )
 
 type Board struct {
 	size  int
 	tiles [][]Tile
+	bombs []*Bomb
+}
+
+func init() {
+	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	const dpi = 72
+	mplusSmallFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    24,
+		DPI:     dpi,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	mplusNormalFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    32,
+		DPI:     dpi,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	mplusBigFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    48,
+		DPI:     dpi,
+		Hinting: font.HintingVertical,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func NewBoard(size int) *Board {
@@ -88,8 +136,29 @@ func (b *Board) placeShip(ship *Ship) {
 	ship.globalY = startTile.y*tileSize + yOffset
 }
 
-func (b *Board) placeBomb(x, y int) {
-	b.tileAt(x, y).state = BombState
+func (b *Board) placeBomb(bomb *Bomb) {
+	b.bombs = append(b.bombs, bomb)
+	b.tileAt(bomb.x, bomb.y).state = BombState
+}
+
+func (b *Board) getBombAtTile(x, y int) *Bomb {
+	for _, bomb := range b.bombs {
+		if bomb.x == x && bomb.y == y {
+			return bomb
+		}
+	}
+
+	return nil
+}
+
+func (b *Board) reduceBombLifetimes() {
+	for _, bomb := range b.bombs {
+		bomb.turnsToLive--
+
+		if bomb.turnsToLive == 0 {
+			b.tileAt(bomb.x, bomb.y).state = BombExplodedState
+		}
+	}
 }
 
 func (b *Board) calculatePossibleMovesForShip(ship *Ship) {
@@ -166,7 +235,14 @@ func (b *Board) Draw(drawerImage *ebiten.Image) {
 			case ShipFrontHitState:
 				drawerImage.DrawImage(shipFrontHitStateImage, op)
 			case BombState:
+				f := mplusBigFont
 				drawerImage.DrawImage(bombStateImage, op)
+				bomb := b.getBombAtTile(i, j)
+				if bomb != nil {
+					text.Draw(drawerImage, strconv.FormatInt(int64(bomb.turnsToLive), 10), f, bomb.x*tileSize+xOffset+13, (bomb.y+1)*tileSize+yOffset-11, color.Black)
+				}
+			case BombExplodedState:
+				drawerImage.DrawImage(bombExplodedStateImage, op)
 			case LegalMoveState:
 				drawerImage.DrawImage(legalMoveImage, op)
 			case IllegalMoveState:

@@ -22,6 +22,7 @@ var (
 	legalMoveImage         = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
 	illegalMoveImage       = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
 	hoverImage             = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
+	bombExplodedStateImage = ebiten.NewImage(tileSizeWithGridOffset, tileSizeWithGridOffset)
 )
 
 func init() {
@@ -32,6 +33,7 @@ func init() {
 	shipSunkStateImage.Fill(color.RGBA{0x66, 0x00, 0x00, 0xff})
 	shipFrontHitStateImage.Fill(color.RGBA{0x66, 0x00, 0x00, 0xff})
 	bombStateImage.Fill(color.RGBA{0x66, 0x33, 0x00, 0xff})
+	bombExplodedStateImage.Fill(color.RGBA{0xff, 0x2d, 0x00, 0xff})
 	legalMoveImage.Fill(color.RGBA{0x66, 0xff, 0xb2, 0xff})
 	illegalMoveImage.Fill(color.RGBA{0xff, 0x66, 0x66, 0xff})
 	hoverImage.Fill(color.RGBA{0x00, 0x00, 0x00, 0x7f})

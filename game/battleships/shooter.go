@@ -97,9 +97,10 @@ func (s *Shooter) GetNewBomb(board *Board) Bomb {
 				randomTile.state == ShipState ||
 				randomTile.state == ShipFrontState {
 				bombPosition = Bomb{
-					x:      randomTile.x,
-					y:      randomTile.y,
-					didHit: false,
+					x:           randomTile.x,
+					y:           randomTile.y,
+					turnsToLive: rand.Intn(4) + 2,
+					didHit:      false,
 				}
 				return bombPosition
 			}

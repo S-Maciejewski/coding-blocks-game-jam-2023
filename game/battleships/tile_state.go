@@ -10,6 +10,7 @@ const (
 	ShipSunkState
 	ShipFrontHitState
 	BombState
+	BombExplodedState
 	LegalMoveState
 	IllegalMoveState
 )

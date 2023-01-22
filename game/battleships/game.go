@@ -75,8 +75,10 @@ func (g *Game) Update() error {
 			changeAllShipsPlaced(g)
 			if g.areAllShipsPlaced {
 				bomb := g.shooter.GetNewBomb(g.board)
-				g.board.placeBomb(bomb.x, bomb.y)
+				g.board.placeBomb(&bomb)
 			}
+
+			g.board.reduceBombLifetimes()
 		} else {
 			g.heldShip.ResetToPreviousPosition()
 		}
