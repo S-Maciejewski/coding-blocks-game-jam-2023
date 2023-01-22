@@ -330,7 +330,7 @@ func (b *Board) DrawOverlay(drawerImage *ebiten.Image) {
 			tile := b.tileAt(bomb.x, bomb.y)
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Translate(float64((tile.x*shipTileSize)+xOffset), float64((tile.y*shipTileSize)+yOffset))
-			if tile.state == ShipState || tile.state == ShipFrontState {
+			if tile.state == ShipState || tile.state == ShipFrontState || tile.state == BombState {
 				drawerImage.DrawImage(shipInDangerStateImage, op)
 				text.Draw(drawerImage, strconv.FormatInt(int64(bomb.turnsToLive), 10), f, bomb.x*tileSize+xOffset+13, (bomb.y+1)*tileSize+yOffset-11, color.Black)
 			}
